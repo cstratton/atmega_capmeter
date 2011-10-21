@@ -256,11 +256,11 @@ uint16_t measure(uint8_t range, uint8_t presel) {
 
   DDRD &= ~(1<<6); //make the AIN0 an input (it's already low, so no pullup);
   
+  cli(); //critical section as we kick it off, so not interrupts
   //Drive an appropriate charge resistor
   DDRB |= charge_mask; 
   PORTB |= charge_mask;
 
-  cli(); //critical section as we kick it off, so not interrupts
   TCCR1B |= presel; //set preselector value to enable counting
 #if 0 //optionally wait until we pass the lower threshold to start measuring
   while (!(TIFR1 & _BV(ICF1))) {  //wait for capture event
@@ -394,15 +394,15 @@ int main(void)
     serialstr("clocks=");
     printeng32(acc);
     serialstr(range ? " R=3.3K" : " R=3.3M");
-    //the math says we should multiple counts by 14.6817 to get to pF
+    //the math says we should multiply counts by 14.6817 to get to pF
     //    acc = acc * 1468L;
     acc = acc * 1450L; //to make my 2400pf+/-2% cap read correct
     acc = acc / 10L;
 
-    if (range == 0) acc = acc /1000; //3.3M capacitor instead of 3.3K
+    if (range == 0) acc = acc /1000; //3.3M resistor instead of 3.3K
     //TODO add scaling for the 330 ohm capacitor if it's installed
     
-    //Crude volatile call mechanism - record reading when the button is down
+    //Crude volatile cal mechanism - record reading when the button is down
     if (!(PINC & (1<<5)))  
       calval = acc;
     /* 
