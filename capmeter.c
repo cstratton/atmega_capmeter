@@ -388,7 +388,7 @@ int main(void)
     acc = acc * timebase;
     acc = acc/trials;
 #else
-    timebase = 1 << (3*(timebase - 1));
+    timebase = 1 << (3*(presel - 1));
     acc = acc * timebase;
 #endif
     serialstr("clocks=");
